@@ -1,5 +1,6 @@
 package com.victor.escuela.entities;
 
+import com.victor.escuela.utils.StringCustomUtils;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,4 +24,12 @@ public class Aula {
 
     @Column(name = "CAPACIDAD", nullable = false)
     private Integer capacidad;
+
+    public void validarDatos(String nombre) {
+        StringCustomUtils.validarTamanio(nombre,1,50, "El nombre es requerido y debe tener 1 entre 50 caracteres");
+    }
+    public void Actualizar(String nombre) {
+        validarDatos(nombre);
+        this.nombre = nombre;
+    }
 }
