@@ -3,7 +3,9 @@ package com.victor.escuela.services.maestros;
 import com.victor.escuela.dto.maestros.MaestroRequest;
 import com.victor.escuela.dto.maestros.MaestroResponse;
 import com.victor.escuela.entities.Maestro;
+import com.victor.escuela.exceptions.EntidadRelacionadaException;
 import com.victor.escuela.mappers.MaestroMapper;
+import com.victor.escuela.repositories.GrupoRepository;
 import com.victor.escuela.repositories.MaestroRepository;
 import com.victor.escuela.services.CrudService;
 import com.victor.escuela.utils.ServiceUtils;
@@ -21,6 +23,7 @@ import java.util.List;
 public class MaestroServiceImpl implements MaestroService {
     private  final MaestroMapper maestroMapper;
     private final MaestroRepository maestroRepository;
+    private final GrupoRepository grupoRepository;
     @Override
     public List<MaestroResponse> listar() {
         log.info("Listando todos los maestros");
@@ -63,6 +66,13 @@ public class MaestroServiceImpl implements MaestroService {
     public void eliminar(Long id) {
         Maestro maestro = obtenerMaestro(id);
         log.info("Eliminando maestro con id: {}", id);
+
+        if (grupoRepository.existsByMaestroId(id))
+            throw new EntidadRelacionadaException(
+                    "No se puede eliminar el maestro ya que tiene grupos asignadas"
+            );
+        maestroRepository.delete(maestro);
+        log.info("Maestro con id {} eliminado", id);
     }
     private Maestro obtenerMaestro(Long id){
         return ServiceUtils.obtenerEntidadOException(maestroRepository,id,Maestro.class);
@@ -72,15 +82,15 @@ public class MaestroServiceImpl implements MaestroService {
         if(maestroRepository.existsByEmailIgnoreCase(request.email().trim()))
             throw new IllegalArgumentException("Ya existe un maestro registrado con el email:" + request.email());
         log.info("Validar telefono unico...");
-        if(maestroRepository.existsByEmailIgnoreCase(request.telefono().trim()))
+        if(maestroRepository.existsByTelefono(request.telefono().trim()))
             throw new IllegalArgumentException("Ya existe un maestro registrado con el telefono:" + request.telefono());
     }
     private void validarCambiosUnicos(MaestroRequest request, Long id){
-        log.info("Validando cambio en telefono...");
+        log.info("Validando cambio en email...");
         if(maestroRepository.existsByEmailIgnoreCaseAndIdNot(request.email().trim(), id))
-            throw new IllegalArgumentException("Ya existe un maestro registrado con el telefono:" + request.email());
+            throw new IllegalArgumentException("Ya existe un maestro registrado con el email:" + request.email());
         log.info("Validar telefono unico...");
-        if(maestroRepository.existsByEmailIgnoreCaseAndIdNot(request.telefono().trim(),id))
+        if(maestroRepository.existsByTelefonoAndIdNot(request.telefono().trim(),id))
             throw new IllegalArgumentException("Ya existe un maestro registrado con el telefono:" + request.telefono());
     }
 

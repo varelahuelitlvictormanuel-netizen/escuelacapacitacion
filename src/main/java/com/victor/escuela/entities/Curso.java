@@ -1,5 +1,6 @@
 package com.victor.escuela.entities;
 
+import com.victor.escuela.utils.StringCustomUtils;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -26,4 +27,12 @@ public class Curso {
 
     @Column(name = "CREDITOS", nullable = false)
     private Integer creditos;
+
+    public void ValidarDatos(String nombre) {
+        StringCustomUtils.validarTamanio(nombre,1,50, "El nombre es requerido y debe tener 1 entre 50 caracteres");
+    }
+    public void Actualizar(String nombre) {
+        ValidarDatos(nombre);
+        this.nombre = nombre;
+    }
 }
